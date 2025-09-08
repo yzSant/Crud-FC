@@ -4,7 +4,7 @@ const initialPlayers = [
     nome: "Andressa Alves",
     posicao: "Meio-campo",
     clube: "Corinthians",
-    foto: "https://example.com/andressa.jpg",
+    foto: "https://static.corinthians.com.br/uploads/17340952198d8818c8e140c64c743113f563cf750f.jpg",
     gols: 15,
     assistencias: 10,
     jogos: 28,
@@ -14,7 +14,7 @@ const initialPlayers = [
     nome: "Dayana Rodríguez",
     posicao: "Meio-campo",
     clube: "Corinthians",
-    foto: "https://example.com/dayana.jpg",
+    foto: "https://www.ogol.com.br/img/jogadores/new/17/86/531786_dayana_rodriguez_20250418230620.png",
     gols: 5,
     assistencias: 12,
     jogos: 30,
@@ -24,7 +24,7 @@ const initialPlayers = [
     nome: "Mariza",
     posicao: "Zagueira",
     clube: "Corinthians",
-    foto: "https://example.com/mariza.jpg",
+    foto: "https://www.ogol.com.br/img/jogadores/new/64/05/526405_mariza_20250723194000.png",
     gols: 2,
     assistencias: 1,
     jogos: 32,
@@ -34,7 +34,7 @@ const initialPlayers = [
     nome: "Thaís Regina",
     posicao: "Zagueira",
     clube: "Corinthians",
-    foto: "https://example.com/thais.jpg",
+    foto: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSTb45soFQKI8Xi1u0fVoqjpfWxxClfDcXyTg&s",
     gols: 1,
     assistencias: 2,
     jogos: 25,
@@ -44,20 +44,17 @@ const initialPlayers = [
     nome: "Letícia Teles",
     posicao: "Zagueira",
     clube: "Corinthians",
-    foto: "https://example.com/leticia.jpg",
+    foto: "https://cdn.meutimao.com.br/fotos-do-corinthians/w941/2025/01/10/leticia_teles_durante_a_pre-temporada_c40q.jpg",
     gols: 0,
     assistencias: 0,
     jogos: 18,
     favorita: false
   }
 ];
-
-// ======= Estado / referências =======
 let players = [];
-let currentPlayerId = null; // guardamos o índice no array
-let currentSort = null;     // 'nome' | 'posicao' | null
+let currentPlayerId = null; 
+let currentSort = null;     
 
-// Elementos DOM
 const playersContainer = document.getElementById('playersContainer');
 const playerModal = document.getElementById('playerModal');
 const deleteModal = document.getElementById('deleteModal');
@@ -67,14 +64,12 @@ const clubeFilter = document.getElementById('clubeFilter');
 const sortByNameBtn = document.getElementById('sortByName');
 const sortByPositionBtn = document.getElementById('sortByPosition');
 
-// ======= Inicialização =======
 document.addEventListener('DOMContentLoaded', () => {
   initializeApp();
   setupEventListeners();
 });
 
 function initializeApp() {
-  // Carrega do LocalStorage ou salva os iniciais
   const stored = localStorage.getItem('footballPlayers');
   if (stored) {
     players = JSON.parse(stored);
@@ -87,36 +82,30 @@ function initializeApp() {
 }
 
 function setupEventListeners() {
-  // Abrir/fechar modal de jogadora
   document.getElementById('addPlayerBtn').addEventListener('click', openAddModal);
   document.querySelector('#playerModal .close').addEventListener('click', closePlayerModal);
   document.getElementById('cancelBtn').addEventListener('click', closePlayerModal);
   playerForm.addEventListener('submit', handlePlayerSubmit);
 
-  // Modal de exclusão
   document.querySelector('#deleteModal .close').addEventListener('click', closeDeleteModal);
   document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
   document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
 
-  // Busca / filtros / ordenação
   searchInput.addEventListener('input', handleSearch);
   clubeFilter.addEventListener('change', handleClubFilter);
   sortByNameBtn.addEventListener('click', () => handleSort('nome'));
   sortByPositionBtn.addEventListener('click', () => handleSort('posicao'));
 
-  // Fechar modais clicando fora
   window.addEventListener('click', (e) => {
     if (e.target === playerModal) closePlayerModal();
     if (e.target === deleteModal) closeDeleteModal();
   });
 }
 
-// ======= Persistência =======
 function saveToLocalStorage() {
   localStorage.setItem('footballPlayers', JSON.stringify(players));
 }
 
-// ======= Renderização =======
 function renderPlayers(playersToRender = players) {
   if (!playersToRender.length) {
     playersContainer.innerHTML = `
@@ -179,7 +168,6 @@ function renderPlayers(playersToRender = players) {
   `).join('');
 }
 
-// ======= Filtro de clubes =======
 function populateClubFilter() {
   const clubs = [...new Set(players.map(p => p.clube))].sort((a, b) =>
     a.localeCompare(b, 'pt', { sensitivity: 'base' })
@@ -188,7 +176,6 @@ function populateClubFilter() {
     clubs.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
-// ======= Modais =======
 function openAddModal() {
   document.getElementById('modalTitle').textContent = 'Nova Jogadora';
   playerForm.reset();
@@ -229,7 +216,6 @@ function closeDeleteModal() {
   currentPlayerId = null;
 }
 
-// ======= CRUD =======
 function handlePlayerSubmit(e) {
   e.preventDefault();
 
@@ -279,7 +265,6 @@ function confirmDelete() {
   showAlert('Jogadora removida com sucesso!', 'success');
 }
 
-// ======= Favoritar =======
 function toggleFavorite(index) {
   const p = players[index];
   if (!p) return;
@@ -288,7 +273,6 @@ function toggleFavorite(index) {
   renderPlayersFilteredView();
 }
 
-// ======= Busca / Filtro / Ordenação =======
 function handleSearch() {
   renderPlayersFilteredView();
 }
@@ -298,11 +282,9 @@ function handleClubFilter() {
 }
 
 function handleSort(sortBy) {
-  // UI: remover classe active de ambos os botões
   document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
 
   if (currentSort === sortBy) {
-    // Reverter ordem se clicar de novo no mesmo
     players.reverse();
   } else {
     players.sort((a, b) => {
@@ -324,7 +306,6 @@ function handleSort(sortBy) {
   renderPlayersFilteredView();
 }
 
-// Aplica busca + filtro antes de renderizar
 function renderPlayersFilteredView() {
   const term = searchInput.value.toLowerCase().trim();
   const club = clubeFilter.value;
@@ -345,9 +326,7 @@ function renderPlayersFilteredView() {
   renderPlayers(list);
 }
 
-// ======= Feedback =======
 function showAlert(message, type) {
-  // Remove existentes
   document.querySelectorAll('.alert').forEach(a => a.remove());
 
   const el = document.createElement('div');
@@ -358,7 +337,6 @@ function showAlert(message, type) {
   `;
   document.body.appendChild(el);
 
-  // animação
   setTimeout(() => el.classList.add('show'), 50);
   setTimeout(() => {
     el.classList.remove('show');
