@@ -1,270 +1,381 @@
-var gir = [
+// ======= Base inicial (conforme enunciado) =======
+const initialPlayers = [
   {
-    "nome": "Andressa Alves",
-    "posicao": "Meio-campo",
-    "clube": "Corinthians",
-    "foto": "https://example.com/andressa.jpg",
-    "gols": 15,
-    "assistencias": 10,
-    "jogos": 28,
-    "favorita": false
+    nome: "Andressa Alves",
+    posicao: "Meio-campo",
+    clube: "Corinthians",
+    foto: "https://example.com/andressa.jpg",
+    gols: 15,
+    assistencias: 10,
+    jogos: 28,
+    favorita: false
   },
   {
-    "nome": "Dayana Rodríguez",
-    "posicao": "Meio-campo",
-    "clube": "Corinthians",
-    "foto": "https://example.com/dayana.jpg",
-    "gols": 5,
-    "assistencias": 12,
-    "jogos": 30,
-    "favorita": false
+    nome: "Dayana Rodríguez",
+    posicao: "Meio-campo",
+    clube: "Corinthians",
+    foto: "https://example.com/dayana.jpg",
+    gols: 5,
+    assistencias: 12,
+    jogos: 30,
+    favorita: false
   },
   {
-    "nome": "Mariza",
-    "posicao": "Zagueira",
-    "clube": "Corinthians",
-    "foto": "https://example.com/mariza.jpg",
-    "gols": 2,
-    "assistencias": 1,
-    "jogos": 32,
-    "favorita": false
+    nome: "Mariza",
+    posicao: "Zagueira",
+    clube: "Corinthians",
+    foto: "https://example.com/mariza.jpg",
+    gols: 2,
+    assistencias: 1,
+    jogos: 32,
+    favorita: false
   },
   {
-    "nome": "Thaís Regina",
-    "posicao": "Zagueira",
-    "clube": "Corinthians",
-    "foto": "https://example.com/thais.jpg",
-    "gols": 1,
-    "assistencias": 2,
-    "jogos": 25,
-    "favorita": false
+    nome: "Thaís Regina",
+    posicao: "Zagueira",
+    clube: "Corinthians",
+    foto: "https://example.com/thais.jpg",
+    gols: 1,
+    assistencias: 2,
+    jogos: 25,
+    favorita: false
   },
   {
-    "nome": "Letícia Teles",
-    "posicao": "Zagueira",
-    "clube": "Corinthians",
-    "foto": "https://example.com/leticia.jpg",
-    "gols": 0,
-    "assistencias": 0,
-    "jogos": 18,
-    "favorita": false
+    nome: "Letícia Teles",
+    posicao: "Zagueira",
+    clube: "Corinthians",
+    foto: "https://example.com/leticia.jpg",
+    gols: 0,
+    assistencias: 0,
+    jogos: 18,
+    favorita: false
   }
 ];
 
-var players = [];
-var editIndex = null;
+// ======= Estado / referências =======
+let players = [];
+let currentPlayerId = null; // guardamos o índice no array
+let currentSort = null;     // 'nome' | 'posicao' | null
 
-// Inicialização
-window.onload = function () {
-  if (!localStorage.getItem("players")) {
-    localStorage.setItem("players", JSON.stringify(gir));
+// Elementos DOM
+const playersContainer = document.getElementById('playersContainer');
+const playerModal = document.getElementById('playerModal');
+const deleteModal = document.getElementById('deleteModal');
+const playerForm = document.getElementById('playerForm');
+const searchInput = document.getElementById('searchInput');
+const clubeFilter = document.getElementById('clubeFilter');
+const sortByNameBtn = document.getElementById('sortByName');
+const sortByPositionBtn = document.getElementById('sortByPosition');
+
+// ======= Inicialização =======
+document.addEventListener('DOMContentLoaded', () => {
+  initializeApp();
+  setupEventListeners();
+});
+
+function initializeApp() {
+  // Carrega do LocalStorage ou salva os iniciais
+  const stored = localStorage.getItem('footballPlayers');
+  if (stored) {
+    players = JSON.parse(stored);
+  } else {
+    players = [...initialPlayers];
+    saveToLocalStorage();
   }
-  players = JSON.parse(localStorage.getItem("players"));
-
-  displayPlayers();
-  fillClubFilter();
-
-  document.getElementById("playerForm").addEventListener("submit", addPlayer);
-  document.getElementById("saveEditBtn").addEventListener("click", saveEdit);
-  document.getElementById("closeModalBtn").addEventListener("click", closeEditModal);
-  document.getElementById("searchInput").addEventListener("input", displayPlayers);
-  document.getElementById("filterClub").addEventListener("change", displayPlayers);
-  document.getElementById("sortSelect").addEventListener("change", displayPlayers);
-};
-
-// Exibir jogadoras
-function displayPlayers() {
-  var container = document.getElementById("playersContainer");
-  container.innerHTML = "";
-
-  var search = document.getElementById("searchInput").value.toLowerCase();
-  var filterClub = document.getElementById("filterClub").value;
-  var sortBy = document.getElementById("sortSelect").value;
-
-  var filtered = [];
-  for (var i = 0; i < players.length; i++) {
-    var p = players[i];
-    if ((p.nome.toLowerCase().indexOf(search) !== -1 ||
-         p.posicao.toLowerCase().indexOf(search) !== -1) &&
-        (filterClub === "" || p.clube === filterClub)) {
-      filtered.push(p);
-    }
-  }
-
-  // Ordenação simples
-  if (sortBy === "nome") {
-    filtered.sort(function (a, b) {
-      var A = a.nome.toLowerCase();
-      var B = b.nome.toLowerCase();
-      if (A < B) return -1;
-      if (A > B) return 1;
-      return 0;
-    });
-  } else if (sortBy === "posicao") {
-    filtered.sort(function (a, b) {
-      var A = a.posicao.toLowerCase();
-      var B = b.posicao.toLowerCase();
-      if (A < B) return -1;
-      if (A > B) return 1;
-      return 0;
-    });
-  }
-
-  for (var j = 0; j < filtered.length; j++) {
-    var player = filtered[j];
-
-    var card = document.createElement("div");
-    card.className = "card";
-
-    var html = "";
-    html += '<img src="' + player.foto + '" alt="' + player.nome + '" onerror="this.src=\'https://via.placeholder.com/150\'">';
-    html += '<div class="card-body">';
-    html += '<h3>' + player.nome + '</h3>';
-    html += '<p>' + player.posicao + ' - ' + player.clube + '</p>';
-    html += '<p>Gols: ' + player.gols + ' | Assistências: ' + player.assistencias + ' | Jogos: ' + player.jogos + '</p>';
-    html += '<div class="actions">';
-    html += '<button onclick="toggleFavorite(' + getIndex(player) + ')">' + (player.favorita ? '★' : '☆') + '</button>';
-    html += '<button onclick="openEditModal(' + getIndex(player) + ')">Editar</button>';
-    html += '<button onclick="deletePlayer(' + getIndex(player) + ')">Excluir</button>';
-    html += '</div>';
-    html += '</div>';
-
-    card.innerHTML = html;
-    container.appendChild(card);
-  }
+  renderPlayers();
+  populateClubFilter();
 }
 
-// Pegar índice no array original
-function getIndex(player) {
-  for (var i = 0; i < players.length; i++) {
-    if (players[i] === player) return i;
-  }
-  return -1;
+function setupEventListeners() {
+  // Abrir/fechar modal de jogadora
+  document.getElementById('addPlayerBtn').addEventListener('click', openAddModal);
+  document.querySelector('#playerModal .close').addEventListener('click', closePlayerModal);
+  document.getElementById('cancelBtn').addEventListener('click', closePlayerModal);
+  playerForm.addEventListener('submit', handlePlayerSubmit);
+
+  // Modal de exclusão
+  document.querySelector('#deleteModal .close').addEventListener('click', closeDeleteModal);
+  document.getElementById('cancelDeleteBtn').addEventListener('click', closeDeleteModal);
+  document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+
+  // Busca / filtros / ordenação
+  searchInput.addEventListener('input', handleSearch);
+  clubeFilter.addEventListener('change', handleClubFilter);
+  sortByNameBtn.addEventListener('click', () => handleSort('nome'));
+  sortByPositionBtn.addEventListener('click', () => handleSort('posicao'));
+
+  // Fechar modais clicando fora
+  window.addEventListener('click', (e) => {
+    if (e.target === playerModal) closePlayerModal();
+    if (e.target === deleteModal) closeDeleteModal();
+  });
 }
 
-// Adicionar jogadora
-function addPlayer(e) {
-  e.preventDefault();
+// ======= Persistência =======
+function saveToLocalStorage() {
+  localStorage.setItem('footballPlayers', JSON.stringify(players));
+}
 
-  var nome = document.getElementById("nome").value;
-  var posicao = document.getElementById("posicao").value;
-  var clube = document.getElementById("clube").value;
-  var foto = document.getElementById("foto").value;
-  var gols = parseInt(document.getElementById("gols").value, 10);
-  var assistencias = parseInt(document.getElementById("assistencias").value, 10);
-  var jogos = parseInt(document.getElementById("jogos").value, 10);
-
-  if (!nome || !posicao || !clube || !foto) {
-    alert("Preencha todos os campos!");
+// ======= Renderização =======
+function renderPlayers(playersToRender = players) {
+  if (!playersToRender.length) {
+    playersContainer.innerHTML = `
+      <div class="empty-state">
+        <i class="fas fa-search"></i>
+        <h3>Nenhuma jogadora encontrada</h3>
+        <p>Tente ajustar os filtros de busca</p>
+      </div>
+    `;
     return;
   }
 
-  var player = {
-    nome: nome,
-    posicao: posicao,
-    clube: clube,
-    foto: foto,
-    gols: isNaN(gols) ? 0 : gols,
-    assistencias: isNaN(assistencias) ? 0 : assistencias,
-    jogos: isNaN(jogos) ? 0 : jogos,
-    favorita: false
-  };
+  playersContainer.innerHTML = playersToRender.map((player, index) => `
+    <div class="player-card ${player.favorita ? 'favorita' : ''}">
+      <div class="player-photo">
+        ${player.foto
+          ? `<img src="${player.foto}" alt="${player.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+             <i class="fas fa-user no-photo" style="display:none;"></i>`
+          : `<i class="fas fa-user no-photo"></i>`
+        }
+      </div>
 
-  players.push(player);
-  savePlayers();
-  displayPlayers();
-  e.target.reset();
-  showAlert("Jogadora adicionada com sucesso!");
+      <div class="player-info">
+        <div class="player-header">
+          <div class="player-details">
+            <h3>${player.nome}</h3>
+            <div class="position">${player.posicao}</div>
+            <div class="club">${player.clube}</div>
+          </div>
+          <button class="favorite-btn ${player.favorita ? 'favorita' : ''}" onclick="toggleFavorite(${index})" title="Favoritar">
+            <i class="fas fa-star"></i>
+          </button>
+        </div>
+
+        <div class="player-stats">
+          <div class="stat">
+            <div class="stat-value">${toInt(player.gols)}</div>
+            <div class="stat-label">Gols</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${toInt(player.assistencias)}</div>
+            <div class="stat-label">Assistências</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value">${toInt(player.jogos)}</div>
+            <div class="stat-label">Jogos</div>
+          </div>
+        </div>
+
+        <div class="player-actions">
+          <button class="action-btn edit-btn" onclick="openEditModal(${index})">
+            <i class="fas fa-edit"></i> Editar
+          </button>
+          <button class="action-btn delete-btn" onclick="openDeleteModal(${index})">
+            <i class="fas fa-trash"></i> Excluir
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
 }
 
-// Favoritar
-function toggleFavorite(index) {
-  players[index].favorita = !players[index].favorita;
-  savePlayers();
-  displayPlayers();
+// ======= Filtro de clubes =======
+function populateClubFilter() {
+  const clubs = [...new Set(players.map(p => p.clube))].sort((a, b) =>
+    a.localeCompare(b, 'pt', { sensitivity: 'base' })
+  );
+  clubeFilter.innerHTML = '<option value="">Todos os clubes</option>' +
+    clubs.map(c => `<option value="${c}">${c}</option>`).join('');
 }
 
-// Abrir modal de edição
+// ======= Modais =======
+function openAddModal() {
+  document.getElementById('modalTitle').textContent = 'Nova Jogadora';
+  playerForm.reset();
+  currentPlayerId = null;
+  playerModal.style.display = 'block';
+}
+
 function openEditModal(index) {
-  editIndex = index;
-  var p = players[index];
-  document.getElementById("editNome").value = p.nome;
-  document.getElementById("editPosicao").value = p.posicao;
-  document.getElementById("editClube").value = p.clube;
-  document.getElementById("editFoto").value = p.foto;
-  document.getElementById("editGols").value = p.gols;
-  document.getElementById("editAssistencias").value = p.assistencias;
-  document.getElementById("editJogos").value = p.jogos;
-  document.getElementById("editModal").style.display = "block";
+  const player = players[index];
+  if (!player) return;
+
+  document.getElementById('modalTitle').textContent = 'Editar Jogadora';
+
+  document.getElementById('nome').value = player.nome;
+  document.getElementById('posicao').value = player.posicao;
+  document.getElementById('clube').value = player.clube;
+  document.getElementById('foto').value = player.foto || '';
+  document.getElementById('gols').value = toInt(player.gols);
+  document.getElementById('assistencias').value = toInt(player.assistencias);
+  document.getElementById('jogos').value = toInt(player.jogos);
+
+  currentPlayerId = index;
+  playerModal.style.display = 'block';
 }
 
-// Fechar modal
-function closeEditModal() {
-  document.getElementById("editModal").style.display = "none";
-  editIndex = null;
+function closePlayerModal() {
+  playerModal.style.display = 'none';
+  currentPlayerId = null;
 }
 
-// Salvar edição
-function saveEdit() {
-  if (editIndex === null) return;
-
-  var p = players[editIndex];
-  p.nome = document.getElementById("editNome").value;
-  p.posicao = document.getElementById("editPosicao").value;
-  p.clube = document.getElementById("editClube").value;
-  p.foto = document.getElementById("editFoto").value;
-  p.gols = parseInt(document.getElementById("editGols").value, 10) || 0;
-  p.assistencias = parseInt(document.getElementById("editAssistencias").value, 10) || 0;
-  p.jogos = parseInt(document.getElementById("editJogos").value, 10) || 0;
-
-  savePlayers();
-  displayPlayers();
-  closeEditModal();
-  showAlert("Jogadora editada com sucesso!");
+function openDeleteModal(index) {
+  currentPlayerId = index;
+  deleteModal.style.display = 'block';
 }
 
-// Excluir jogadora
-function deletePlayer(index) {
-  if (confirm("Tem certeza que deseja excluir esta jogadora?")) {
-    players.splice(index, 1);
-    savePlayers();
-    displayPlayers();
-    showAlert("Jogadora removida com sucesso!");
+function closeDeleteModal() {
+  deleteModal.style.display = 'none';
+  currentPlayerId = null;
+}
+
+// ======= CRUD =======
+function handlePlayerSubmit(e) {
+  e.preventDefault();
+
+  const nome = document.getElementById('nome').value.trim();
+  const posicao = document.getElementById('posicao').value.trim();
+  const clube = document.getElementById('clube').value.trim();
+  const foto = document.getElementById('foto').value.trim();
+  const gols = clampNonNegativeInt(document.getElementById('gols').value);
+  const assistencias = clampNonNegativeInt(document.getElementById('assistencias').value);
+  const jogos = clampNonNegativeInt(document.getElementById('jogos').value);
+
+  if (!nome || !posicao || !clube) {
+    showAlert('Por favor, preencha todos os campos obrigatórios!', 'error');
+    return;
+  }
+
+  const data = { nome, posicao, clube, foto, gols, assistencias, jogos, favorita: false };
+
+  if (currentPlayerId === null) {
+    // Create
+    players.unshift(data);
+    saveToLocalStorage();
+    renderPlayersFilteredView();
+    populateClubFilter();
+    closePlayerModal();
+    showAlert('Jogadora adicionada com sucesso!', 'success');
+  } else {
+    // Update
+    const oldFav = players[currentPlayerId].favorita;
+    players[currentPlayerId] = { ...data, favorita: oldFav };
+    saveToLocalStorage();
+    renderPlayersFilteredView();
+    populateClubFilter();
+    closePlayerModal();
+    showAlert('Jogadora editada com sucesso!', 'success');
   }
 }
 
-// Salvar no localStorage
-function savePlayers() {
-  localStorage.setItem("players", JSON.stringify(players));
+function confirmDelete() {
+  if (currentPlayerId === null) return;
+  // Delete
+  players.splice(currentPlayerId, 1);
+  saveToLocalStorage();
+  renderPlayersFilteredView();
+  populateClubFilter();
+  closeDeleteModal();
+  showAlert('Jogadora removida com sucesso!', 'success');
 }
 
-// Preencher filtro de clubes
-function fillClubFilter() {
-  var clubs = [];
-  for (var i = 0; i < players.length; i++) {
-    var clube = players[i].clube;
-    if (clubs.indexOf(clube) === -1) {
-      clubs.push(clube);
-    }
+// ======= Favoritar =======
+function toggleFavorite(index) {
+  const p = players[index];
+  if (!p) return;
+  p.favorita = !p.favorita;
+  saveToLocalStorage();
+  renderPlayersFilteredView();
+}
+
+// ======= Busca / Filtro / Ordenação =======
+function handleSearch() {
+  renderPlayersFilteredView();
+}
+
+function handleClubFilter() {
+  renderPlayersFilteredView();
+}
+
+function handleSort(sortBy) {
+  // UI: remover classe active de ambos os botões
+  document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+
+  if (currentSort === sortBy) {
+    // Reverter ordem se clicar de novo no mesmo
+    players.reverse();
+  } else {
+    players.sort((a, b) => {
+      if (sortBy === 'nome') {
+        return a.nome.localeCompare(b.nome, 'pt', { sensitivity: 'base' });
+      }
+      if (sortBy === 'posicao') {
+        return a.posicao.localeCompare(b.posicao, 'pt', { sensitivity: 'base' });
+      }
+      return 0;
+    });
+    currentSort = sortBy;
+
+    if (sortBy === 'nome') sortByNameBtn.classList.add('active');
+    if (sortBy === 'posicao') sortByPositionBtn.classList.add('active');
   }
 
-  clubs.sort();
-  var filterSelect = document.getElementById("filterClub");
-  for (var j = 0; j < clubs.length; j++) {
-    var option = document.createElement("option");
-    option.value = clubs[j];
-    option.textContent = clubs[j];
-    filterSelect.appendChild(option);
-  }
+  saveToLocalStorage();
+  renderPlayersFilteredView();
 }
 
-// Alert simples
-function showAlert(msg) {
-  var div = document.createElement("div");
-  div.className = "alert";
-  div.textContent = msg;
-  document.body.appendChild(div);
-  setTimeout(function () {
-    document.body.removeChild(div);
-  }, 2000);
+// Aplica busca + filtro antes de renderizar
+function renderPlayersFilteredView() {
+  const term = searchInput.value.toLowerCase().trim();
+  const club = clubeFilter.value;
+
+  let list = [...players];
+
+  if (club) {
+    list = list.filter(p => p.clube === club);
+  }
+
+  if (term) {
+    list = list.filter(p =>
+      p.nome.toLowerCase().includes(term) ||
+      p.posicao.toLowerCase().includes(term)
+    );
+  }
+
+  renderPlayers(list);
 }
+
+// ======= Feedback =======
+function showAlert(message, type) {
+  // Remove existentes
+  document.querySelectorAll('.alert').forEach(a => a.remove());
+
+  const el = document.createElement('div');
+  el.className = `alert ${type}`;
+  el.innerHTML = `
+    <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+    ${message}
+  `;
+  document.body.appendChild(el);
+
+  // animação
+  setTimeout(() => el.classList.add('show'), 50);
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 300);
+  }, 3000);
+}
+
+function toInt(v) {
+  const n = parseInt(v, 10);
+  return Number.isFinite(n) ? n : 0;
+}
+
+function clampNonNegativeInt(v) {
+  const n = toInt(v);
+  return n < 0 ? 0 : n;
+}
+
+window.openEditModal = openEditModal;
+window.openDeleteModal = openDeleteModal;
+window.toggleFavorite = toggleFavorite;
