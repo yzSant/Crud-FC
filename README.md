@@ -1,2 +1,19 @@
-# Crud-FC
-Este projeto é uma aplicação web desenvolvida para o Checkpoint de WebDev que funciona como um sistema completo de gerenciamento de jogadoras de futebol feminino. A aplicação permite realizar as operações básicas de CRUD utilizando HTML, CSS e JavaScript puro com dados armazenados no LocalStorage do navegador.
+#  Gerenciador de Jogadoras - Futebol Feminino
+
+Este projeto foi desenvolvido como parte da avaliação **CP - WebDev - CRUD**.
+
+##  Objetivo
+Criar uma aplicação web em **HTML, CSS e JavaScript** que permita gerenciar informações de jogadoras de futebol feminino, simulando um banco de dados local com `LocalStorage`.
+
+##  Funcionalidades
+- **CRUD completo**:
+  - Criar novas jogadoras
+  - Listar em formato de cards
+  - Editar dados (incluindo foto)
+  - Remover jogadoras
+- **Favoritar jogadoras**
+- **Filtros e busca**:
+  - Buscar por nome ou posição
+  - Filtrar por clube
+  - Ordenar por nome ou posição
+
