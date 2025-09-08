@@ -122,10 +122,11 @@ function renderPlayers(playersToRender = players) {
     <div class="player-card ${player.favorita ? 'favorita' : ''}">
       <div class="player-photo">
         ${player.foto
-          ? `<img src="${player.foto}" alt="${player.nome}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-             <i class="fas fa-user no-photo" style="display:none;"></i>`
-          : `<i class="fas fa-user no-photo"></i>`
+          ? `<img src="${player.foto}" alt="${player.nome}" 
+                 onerror="this.style.display='none'; this.parentNode.querySelector('.no-photo').style.display='block';">`
+          : `<img src="" style="display:none;">`
         }
+        <i class="fas fa-user no-photo" style="display:${player.foto ? 'none' : 'block'};"></i>
       </div>
 
       <div class="player-info">
@@ -167,6 +168,8 @@ function renderPlayers(playersToRender = players) {
     </div>
   `).join('');
 }
+
+
 
 function populateClubFilter() {
   const clubs = [...new Set(players.map(p => p.clube))].sort((a, b) =>
