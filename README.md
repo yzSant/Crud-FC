@@ -1,6 +1,9 @@
 #  Gerenciador de Jogadoras - Futebol Feminino
 
 Este projeto foi desenvolvido como parte da avaliação **CP - WebDev - CRUD**.
+e feito por:
+ - Brenda Thaís RM: 561258
+ - Lucas Santana RM: 566261
 
 ##  Objetivo
 Criar uma aplicação web em **HTML, CSS e JavaScript** que permita gerenciar informações de jogadoras de futebol feminino, simulando um banco de dados local com `LocalStorage`.
